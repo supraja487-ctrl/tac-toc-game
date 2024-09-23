@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+       *{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Body and Main Container Styles */
+body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f4f4f9;
+}
+
+main {
+  text-align: center;
+}
+
+/* Tic Tac Toe Heading */
+h1 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* Game Container and Box Layout */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.game {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 10px;
+  width: 300px;
+  margin: 0 auto;
+}
+
+.box {
+  width: 100px;
+  height: 100px;
+  background-color: #fff;
+  border: 2px solid #333;
+  font-size: 2.5em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.box:hover {
+  background-color: #e0e1e6;
+}
+
+/* Winning Message and Button Styles */
+.msg-container {
+  display: none; /* Hidden by default */
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 10;
+}
+
+.msg-container.show {
+  display: flex; /* Show when triggered */
+}
+
+#msg {
+  font-size: 2em;
+  margin-bottom: 20px;
+}
+
+/* Buttons */
+button {
+  padding: 10px 20px;
+  font-size: 1em;
+  background-color: #4e8cff;
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+button:hover {
+  background-color: #3a6bff;
+}
+
+/* Reset and New Game Buttons */
+#reset, #new {
+  margin-top: 20px;
+  background-color: #ff6b6b;
+}
+
+#reset:hover, #new:hover {
+  background-color: #ff4b4b;
+}
+
+    </style>
+    
+</head>
+<body>
+    <div class="msg-container hide">
+        <p id="msg">winner</p>
+         <button id="new">new game</button>
+    </div>
+    <main>
+        <h1>Tic Tac Toe</h1>
+        <div class="container">
+            <div class="game">
+                <button class="box"></button>
+                <button class="box"></button>
+                <button class="box"></button>
+                <button class="box"></button>
+                <button class="box"></button>
+                <button class="box"></button>
+                <button class="box"></button>
+                <button class="box"></button>
+                <button class="box"></button>
+                </div>
+        </div>
+        <button id="reset">reset Game</button>
+    </main>
+    <script>
+        // Select all necessary elements
+const boxes = document.querySelectorAll('.box');
+const resetButton = document.getElementById('reset');
+const newGameButton = document.getElementById('new');
+const messageContainer = document.querySelector('.msg-container');
+const messageText = document.getElementById('msg');
+
+// Define variables for game state
+let currentPlayer = 'X'; // X starts the game
+let gameActive = true;   // Game is active
+let board = ['', '', '', '', '', '', '', '', '']; // Empty board array
+
+// Winning combinations for Tic Tac Toe
+const winningCombos = [
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+  [0, 4, 8],
+  [2, 4, 6]
+];
+
+// Handle box click event
+function handleBoxClick(e) {
+  const clickedBox = e.target;
+  const clickedIndex = Array.from(boxes).indexOf(clickedBox);
+
+  // If box already has a value or game is over, do nothing
+  if (board[clickedIndex] !== '' || !gameActive) {
+    return;
+  }
+
+  // Update the box and the board state
+  board[clickedIndex] = currentPlayer;
+  clickedBox.innerText = currentPlayer;
+
+  // Check for winner or tie
+  checkResult();
+}
+
+// Check if there is a winner or a tie
+function checkResult() {
+  let roundWon = false;
+
+  // Check each winning combination
+  for (let i = 0; i < winningCombos.length; i++) {
+    const [a, b, c] = winningCombos[i];
+    if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+      roundWon = true;
+      break;
+    }
+  }
+
+  // If a round is won, display the winner
+  if (roundWon) {
+    gameActive = false;
+    messageText.innerText = `Player ${currentPlayer} Wins!`;
+    messageContainer.classList.add('show');
+    return;
+  }
+
+  // Check for a tie (if no empty spots left)
+  const roundTie = !board.includes('');
+  if (roundTie) {
+    gameActive = false;
+    messageText.innerText = `It's a Tie!`;
+    messageContainer.classList.add('show');
+    return;
+  }
+
+  // Switch to the next player
+  currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+}
+
+// Reset the game board
+function resetGame() {
+  currentPlayer = 'X';
+  gameActive = true;
+  board = ['', '', '', '', '', '', '', '', ''];
+  boxes.forEach(box => {
+    box.innerText = '';
+  });
+  messageContainer.classList.remove('show');
+}
+
+// Add event listeners to the game boxes and buttons
+boxes.forEach(box => {
+  box.addEventListener('click', handleBoxClick);
+});
+
+resetButton.addEventListener('click', resetGame);
+newGameButton.addEventListener('click', resetGame);
+
+
+
+    </script>
+</body>
+</html>
